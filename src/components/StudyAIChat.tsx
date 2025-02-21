@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getSubjectBadge } from '@/utils/subjectBadges';
+import StudyMatrix from './StudyMatrix';
 
 interface StudyAIChatProps {
   subject: string | null;
@@ -36,9 +37,9 @@ export default function StudyAIChat({ subject }: StudyAIChatProps) {
       
       // Create chat context
       const chat = model.startChat({
-        history: messages.map(msg => ({
-          role: msg.isUser ? "user" : "assistant",
-          parts: msg.text,
+        history: messages.slice(0, -1).map(msg => ({
+          role: msg.isUser ? "user" : "model",
+          parts: [{ text: msg.text }],
         })),
         generationConfig: {
           maxOutputTokens: 500,
@@ -99,26 +100,22 @@ export default function StudyAIChat({ subject }: StudyAIChatProps) {
 
   return (
     <div className="fixed bottom-4 right-4 w-80 bg-white rounded-lg shadow-xl z-50">
-      <div className="flex justify-between items-center p-4 border-b">
-        <div className="flex items-center gap-2">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${subjectBadge.bgColor}`}>
-            <span className="text-lg">{subjectBadge.icon}</span>
+      <div className="p-4 border-b">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">{subjectBadge.icon}</span>
+            <h3 className={`font-medium ${subjectBadge.color}`}>
+              {subject || 'Study Assistant'}
+            </h3>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">AI Coach</h3>
-            {subject && (
-              <span className={`text-sm ${subjectBadge.color} font-medium`}>
-                {subject}
-              </span>
-            )}
-          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
         </div>
-        <button
-          onClick={() => setIsOpen(false)}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          ✕
-        </button>
+        <StudyMatrix subject={subject} />
       </div>
 
       <div className="h-96 overflow-y-auto p-4 space-y-4">

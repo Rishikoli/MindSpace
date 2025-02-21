@@ -1,4 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MindSpace
+
+MindSpace is a comprehensive study and focus application built with Next.js that helps students enhance their learning experience through AI-powered features, focus tools, and progress tracking.
+
+## Project Overview
+
+MindSpace offers several key features:
+- **AI Coach**: Personalized study assistance and guidance
+- **Focus Mode**: Ambient sounds and focus-enhancing tools
+- **Study Plans**: Create and manage custom study plans
+- **Progress Tracking**: Monitor your learning journey
+- **Interactive Quizzes**: Test your knowledge with AI-generated quizzes
+
+## Project Structure
+
+```
+mindspace/
+├── public/                 # Static assets
+│   ├── sounds/            # Ambient sound files
+│   └── ...                # Other static assets
+├── src/
+│   ├── app/               # Next.js app router pages
+│   │   ├── ai-coach/      # AI coaching feature
+│   │   ├── focus/        # Focus mode feature
+│   │   ├── progress/     # Progress tracking
+│   │   └── study-plans/  # Study plans management
+│   ├── components/        # Reusable React components
+│   └── utils/            # Utility functions and helpers
+├── .env.local            # Environment variables
+├── next.config.ts        # Next.js configuration
+├── package.json          # Project dependencies
+└── tailwind.config.ts    # Tailwind CSS configuration
+```
 
 ## Getting Started
 
@@ -31,6 +63,10 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework**: Next.js 14 with App Router
+- **Styling**: Tailwind CSS
+- **AI Integration**: Google Gemini API
+- **Type Safety**: TypeScript
+- **Audio Features**: Web Audio API
