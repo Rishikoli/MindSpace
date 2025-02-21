@@ -9,6 +9,10 @@ export interface StudyRecommendation {
   type: 'review' | 'quiz' | 'video';
 }
 
+interface LearningPattern {
+  // Add properties for the learning pattern here
+}
+
 const fallbackRecommendations: StudyRecommendation[] = [
   {
     title: "Review Core Concepts",
@@ -102,7 +106,7 @@ export async function getStudyRecommendations(topic: string): Promise<StudyRecom
   }
 }
 
-export async function getPersonalizedInsights(learningData: any): Promise<string[]> {
+export async function getPersonalizedInsights(learningData: LearningPattern): Promise<string[]> {
   if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
     console.warn('Gemini API key not found. Using fallback data.');
     return fallbackInsights;

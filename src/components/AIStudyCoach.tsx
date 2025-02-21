@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getStudyRecommendations, getPersonalizedInsights } from '@/utils/gemini';
+import type { LearningInsight, StudySession, LearningPattern } from '@/types/study';
 
 interface LearningInsight {
   type: 'strength' | 'weakness' | 'suggestion';
@@ -31,14 +31,14 @@ interface LearningPattern {
 
 export default function AIStudyCoach() {
   const [insights, setInsights] = useState<LearningInsight[]>([]);
-  const [sessions, setSessions] = useState<StudySession[]>(() => {
+  const [sessions] = useState<StudySession[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('study_sessions');
       return saved ? JSON.parse(saved) : [];
     }
     return [];
   });
-  const [learningPattern, setLearningPattern] = useState<LearningPattern>(() => {
+  const [learningPattern] = useState<LearningPattern>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('learning_pattern');
       return saved ? JSON.parse(saved) : {
