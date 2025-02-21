@@ -31,10 +31,6 @@ export default function RootLayout({
                     className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition">
                     Study Plans
                   </Link>
-                  <Link href="/progress" 
-                    className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition">
-                    Progress
-                  </Link>
                   <Link href="/focus" 
                     className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition">
                     Focus Mode
