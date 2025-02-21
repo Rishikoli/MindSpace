@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { AMBIENT_SOUNDS, audioManager } from '@/utils/audio';
 
 interface TimerSettings {
   workDuration: number;
@@ -13,7 +14,7 @@ type TimerState = 'work' | 'break' | 'longBreak';
 
 export default function FocusMode() {
   const [isRunning, setIsRunning] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [timerState, setTimerState] = useState<TimerState>('work');
   const [completedSessions, setCompletedSessions] = useState(0);
   const [settings, setSettings] = useState<TimerSettings>({
@@ -24,6 +25,7 @@ export default function FocusMode() {
   });
   const [showSettings, setShowSettings] = useState(false);
   const [ambientSound, setAmbientSound] = useState<string | null>(null);
+  const [volume, setVolume] = useState(50);
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
@@ -32,6 +34,19 @@ export default function FocusMode() {
       setUserName(savedName);
     }
   }, []);
+
+  // Reset timer when settings change
+  useEffect(() => {
+    if (!isRunning) {
+      if (timerState === 'work') {
+        setTimeLeft(settings.workDuration * 60);
+      } else if (timerState === 'break') {
+        setTimeLeft(settings.breakDuration * 60);
+      } else {
+        setTimeLeft(settings.longBreakDuration * 60);
+      }
+    }
+  }, [settings, timerState, isRunning]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -47,7 +62,7 @@ export default function FocusMode() {
     return () => clearInterval(interval);
   }, [isRunning, timeLeft]);
 
-  const handleTimerComplete = () => {
+  const handleTimerComplete = useCallback(() => {
     const notification = new Audio('/notification.mp3');
     notification.play();
 
@@ -66,6 +81,35 @@ export default function FocusMode() {
       setTimerState('work');
       setTimeLeft(settings.workDuration * 60);
     }
+    setIsRunning(false);
+  }, [timerState, completedSessions, settings]);
+
+  const handleSettingsChange = (key: keyof TimerSettings, value: number) => {
+    if (value > 0) {
+      setSettings(prev => ({
+        ...prev,
+        [key]: value
+      }));
+    }
+  };
+
+  const handleAmbientSound = (soundName: string) => {
+    if (ambientSound === soundName) {
+      audioManager.stop();
+      setAmbientSound(null);
+    } else {
+      const sound = AMBIENT_SOUNDS.find(s => s.name === soundName);
+      if (sound) {
+        audioManager.setVolume(volume / 100);
+        audioManager.play(sound);
+        setAmbientSound(soundName);
+      }
+    }
+  };
+
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+    audioManager.setVolume(newVolume / 100);
   };
 
   const formatTime = (seconds: number): string => {
@@ -81,14 +125,6 @@ export default function FocusMode() {
         ? settings.breakDuration * 60 
         : settings.longBreakDuration * 60;
     return ((totalSeconds - timeLeft) / totalSeconds) * 100;
-  };
-
-  const handleAmbientSound = (sound: string) => {
-    if (ambientSound === sound) {
-      setAmbientSound(null);
-    } else {
-      setAmbientSound(sound);
-    }
   };
 
   return (
@@ -158,13 +194,21 @@ export default function FocusMode() {
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-semibold mb-4 text-gray-900">Ambient Sounds</h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-800 mb-1">
+                  Volume
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={volume}
+                  onChange={(e) => handleVolumeChange(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
-                {[
-                  { name: 'Rain', icon: '🌧️' },
-                  { name: 'Forest', icon: '🌲' },
-                  { name: 'Cafe', icon: '☕' },
-                  { name: 'Ocean', icon: '🌊' },
-                ].map((sound) => (
+                {AMBIENT_SOUNDS.map((sound) => (
                   <button
                     key={sound.name}
                     onClick={() => handleAmbientSound(sound.name)}
@@ -175,7 +219,8 @@ export default function FocusMode() {
                     }`}
                   >
                     <div className="text-2xl mb-2">{sound.icon}</div>
-                    <div className="font-medium">{sound.name}</div>
+                    <div className="font-medium mb-1">{sound.name}</div>
+                    <div className="text-sm text-gray-600">{sound.description}</div>
                   </button>
                 ))}
               </div>
@@ -191,7 +236,7 @@ export default function FocusMode() {
                   <input
                     type="number"
                     value={settings.workDuration}
-                    onChange={(e) => setSettings({ ...settings, workDuration: Number(e.target.value) })}
+                    onChange={(e) => handleSettingsChange('workDuration', Number(e.target.value))}
                     className="w-full p-2 border rounded text-gray-900"
                     min="1"
                     max="60"
@@ -204,7 +249,7 @@ export default function FocusMode() {
                   <input
                     type="number"
                     value={settings.breakDuration}
-                    onChange={(e) => setSettings({ ...settings, breakDuration: Number(e.target.value) })}
+                    onChange={(e) => handleSettingsChange('breakDuration', Number(e.target.value))}
                     className="w-full p-2 border rounded text-gray-900"
                     min="1"
                     max="30"
@@ -217,10 +262,23 @@ export default function FocusMode() {
                   <input
                     type="number"
                     value={settings.longBreakDuration}
-                    onChange={(e) => setSettings({ ...settings, longBreakDuration: Number(e.target.value) })}
+                    onChange={(e) => handleSettingsChange('longBreakDuration', Number(e.target.value))}
                     className="w-full p-2 border rounded text-gray-900"
                     min="1"
                     max="60"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
+                    Sessions Before Long Break
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.sessionsBeforeLongBreak}
+                    onChange={(e) => handleSettingsChange('sessionsBeforeLongBreak', Number(e.target.value))}
+                    className="w-full p-2 border rounded text-gray-900"
+                    min="1"
+                    max="10"
                   />
                 </div>
               </div>
