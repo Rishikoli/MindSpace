@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getStudyRecommendations } from '@/utils/gemini';
 import Quiz from '@/components/Quiz';
 import CustomStudyPlan from '@/components/CustomStudyPlan';
 import StudyAIChat from '@/components/StudyAIChat';
@@ -157,27 +156,24 @@ const XP_PER_RESOURCE = {
 };
 
 const progressManager = {
-  getProgress: (userName: string, subject: string) => {
-    // Simulate getting progress from database or API
-    return {
-      xp: 100,
-      level: 2,
-      badges: ['badge1', 'badge2']
-    };
+  getProgress: async () => {
+    // Implementation
+    return { level: 1, xp: 0, totalXp: 100 };
   },
-  markResourceCompleted: (userName: string, subject: string, resourceId: string, type: string) => {
-    // Simulate marking resource as completed in database or API
+  markResourceCompleted: async (type: string) => {
+    // Implementation
+    return true;
   },
-  getCompletedResources: (userName: string, subject: string) => {
-    // Simulate getting completed resources from database or API
-    return ['resource1', 'resource2'];
+  getCompletedResources: async () => {
+    // Implementation
+    return [];
   },
-  getNextLevelXP: (userName: string, subject: string) => {
-    // Simulate getting next level XP from database or API
-    return 200;
+  getNextLevelXP: async () => {
+    // Implementation
+    return 100;
   },
-  getBadgeDetails: (badgeId: string) => {
-    // Simulate getting badge details from database or API
+  getBadgeDetails: async (badgeId: string) => {
+    // Implementation
     return {
       icon: '🏆',
       name: 'Badge Name',
@@ -248,7 +244,7 @@ export default function StudyPlans() {
 
   useEffect(() => {
     if (selectedSubject && userName) {
-      const userProgress = progressManager.getProgress(userName, selectedSubject);
+      const userProgress = progressManager.getProgress();
       setProgress(userProgress);
     }
   }, [selectedSubject, userName]);
@@ -259,31 +255,31 @@ export default function StudyPlans() {
     setTimeout(() => setLoading(false), 500);
   };
 
-  const handleResourceComplete = (resourceId: string, type: string) => {
+  const handleResourceComplete = (type: string) => {
     if (userName && selectedSubject) {
-      progressManager.markResourceCompleted(userName, selectedSubject, resourceId, type);
-      const updatedProgress = progressManager.getProgress(userName, selectedSubject);
+      progressManager.markResourceCompleted(type);
+      const updatedProgress = progressManager.getProgress();
       setProgress(updatedProgress);
     }
   };
 
   const calculateProgress = (subject: string): number => {
     if (!userName) return 0;
-    const completed = progressManager.getCompletedResources(userName, subject);
+    const completed = progressManager.getCompletedResources();
     const total = sampleResources[subject].length;
     return Math.round((completed.length / total) * 100);
   };
 
   const isResourceCompleted = (resourceId: string): boolean => {
     if (!userName || !selectedSubject) return false;
-    const completed = progressManager.getCompletedResources(userName, selectedSubject);
+    const completed = progressManager.getCompletedResources();
     return completed.includes(resourceId);
   };
 
   const renderProgressBar = () => {
     if (!progress) return null;
 
-    const nextLevelXP = progressManager.getNextLevelXP(userName, selectedSubject!);
+    const nextLevelXP = progressManager.getNextLevelXP();
     const progressPercent = (progress.xp / nextLevelXP) * 100;
 
     return (
@@ -447,14 +443,14 @@ export default function StudyPlans() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-600 hover:text-blue-800 text-sm font-medium inline-flex items-center"
-                                    onClick={() => handleResourceComplete(resourceId, resource.type)}
+                                    onClick={() => handleResourceComplete(resource.type)}
                                   >
                                     {completed ? 'Review Again' : 'Start Learning'} →
                                   </a>
                                 ) : (
                                   <button
                                     className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                                    onClick={() => handleResourceComplete(resourceId, resource.type)}
+                                    onClick={() => handleResourceComplete(resource.type)}
                                   >
                                     {completed ? 'Review Again' : `Start ${resource.type.charAt(0).toUpperCase() + resource.type.slice(1)}`} →
                                   </button>

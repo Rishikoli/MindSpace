@@ -23,7 +23,6 @@ export default function FocusMode() {
     longBreakDuration: 15,
     sessionsBeforeLongBreak: 4,
   });
-  const [showSettings, setShowSettings] = useState(false);
   const [ambientSound, setAmbientSound] = useState<string | null>(null);
   const [volume, setVolume] = useState(50);
   const [userName, setUserName] = useState('');
@@ -60,7 +59,7 @@ export default function FocusMode() {
     }
 
     return () => clearInterval(interval);
-  }, [isRunning, timeLeft]);
+  }, [isRunning, timeLeft, handleTimerComplete]);
 
   const handleTimerComplete = useCallback(() => {
     const notification = new Audio('/notification.mp3');
